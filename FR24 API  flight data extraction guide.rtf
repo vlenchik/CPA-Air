@@ -1,0 +1,401 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 TimesNewRomanPS-BoldMT;\f2\froman\fcharset0 Times-Roman;
+\f3\fnil\fcharset0 AppleColorEmoji;\f4\fmodern\fcharset0 Courier;\f5\fnil\fcharset0 STIXTwoMath-Regular;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\margl1440\margr1440\vieww34140\viewh38460\viewkind0
+\deftab720
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 FR24 Flight Track 
+\f1 \uc0\u8594 
+\f0  CSV Extraction Runbook\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\b0\fs24 \cf0 This guide shows how to download 
+\f0\b full flight track data
+\f2\b0  from Flightradar24 and convert it into a clean CSV file, optionally sliced to a time window.\
+This method avoids API rate limits and provides 
+\f0\b high-resolution playback-quality data
+\f2\b0 .\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u55358 \u56816 
+\f0\b  Requirements\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Tools\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls1\ilvl0
+\f4\b0\fs26 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 curl
+\f2\fs24 \
+\ls1\ilvl0
+\f4\fs26 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 jq
+\f2\fs24 \
+\ls1\ilvl0
+\f4\fs26 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 python3
+\f2\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Install on macOS:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+brew install jq\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u55357 \u56593 
+\f0\b  Step 0 \'97 Set API Token\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b0\fs26 \cf0 \
+export FR24_TOKEN="YOUR_BEARER_TOKEN_HERE"\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 Verify:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+printenv FR24_TOKEN | head -c 6; echo\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u9992 \u65039 
+\f0\b  Step 1 \'97 Download the flight track JSON\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\b0\fs24 \cf0 You must know the 
+\f0\b flight_id
+\f2\b0  (unique to one flight instance).\
+Example:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+flight_id = 3e115318\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 Download:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+FLIGHT_ID="3e115318"\
+\
+curl -sS \\\
+  -H "Authorization: Bearer $FR24_TOKEN" \\\
+  -H "Accept: application/json" \\\
+  -H "Accept-Version: v1" \\\
+  --get \\\
+  --data-urlencode "flight_id=$\{FLIGHT_ID\}" \\\
+  "https://fr24api.flightradar24.com/api/flight-tracks" \\\
+  -o "track_$\{FLIGHT_ID\}.json"\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 Check file:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+ls -lh track_$\{FLIGHT_ID\}.json\
+jq 'type' track_$\{FLIGHT_ID\}.json\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u55358 \u56800 
+\f0\b  Step 2 \'97 Inspect structure\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b0\fs26 \cf0 \
+jq 'keys' track_$\{FLIGHT_ID\}.json\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 If output is:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+[0]\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 The JSON is a 
+\f0\b top-level array
+\f2\b0 .\
+Check fields:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+jq '.[0] | keys' track_$\{FLIGHT_ID\}.json\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 If it shows:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+["fr24_id","tracks"]\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 Then the track points live at:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+.[0].tracks[]\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u55357 \u56548 
+\f0\b  Step 3 \'97 Convert JSON 
+\f1 \uc0\u8594 
+\f0  CSV\
+\pard\pardeftab720\partightenfactor0
+
+\f4\b0\fs26 \cf0 \
+jq -r '\
+  (["ts","lat","lon","alt","track","speed","vspeed","bank","pitch"] | @csv),\
+  (.[0].tracks[] | [\
+    (.timestamp // .ts // .time // ""),\
+    (.lat // .latitude // ""),\
+    (.lon // .longitude // ""),\
+    (.alt // .altitude // ""),\
+    (.track // .heading // ""),\
+    (.speed // .gspeed // .ground_speed // ""),\
+    (.vspeed // .vertical_speed // ""),\
+    (.bank // ""),\
+    (.pitch // "")\
+  ] | @csv)\
+' track_$\{FLIGHT_ID\}.json > track_$\{FLIGHT_ID\}.csv\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 Verify:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+wc -l track_$\{FLIGHT_ID\}.csv\
+head -n 5 track_$\{FLIGHT_ID\}.csv\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f5\fs36 \cf0 \strokec2 \uc0\u9201 
+\f0\b  Step 4 \'97 Slice to a time window (optional)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\b0\fs24 \cf0 Example: 
+\f0\b 2026-01-26 21:28 
+\f1 \uc0\u8594 
+\f0  21:41 UTC
+\f2\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+python3 - <<'PY'\
+import pandas as pd\
+\
+FLIGHT_ID="3e115318"\
+df = pd.read_csv(f"track_\{FLIGHT_ID\}.csv")\
+\
+df["ts"] = pd.to_numeric(df["ts"], errors="coerce")\
+df = df.dropna(subset=["ts"])\
+df["utc"] = pd.to_datetime(df["ts"], unit="s", utc=True)\
+\
+start = pd.Timestamp("2026-01-26 21:28:00", tz="UTC")\
+end   = pd.Timestamp("2026-01-26 21:41:00", tz="UTC")\
+\
+out = df[(df["utc"]>=start)&(df["utc"]<=end)]\
+out.to_csv(f"track_\{FLIGHT_ID\}_2128_2141.csv", index=False)\
+\
+print("Rows:", len(out))\
+PY\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u9881 \u65039 
+\f0\b  One-command script (download 
+\f1 \uc0\u8594 
+\f0  CSV 
+\f1 \uc0\u8594 
+\f0  sliced CSV)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\b0\fs24 \cf0 Save as 
+\f4\fs26 fr24_flightid_to_csv.sh
+\f2\fs24 \
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+#!/usr/bin/env bash\
+set -euo pipefail\
+: "$\{FR24_TOKEN:?Set FR24_TOKEN first\}"\
+\
+FLIGHT_ID="$1"\
+START_UTC="$\{2:-\}"\
+END_UTC="$\{3:-\}"\
+\
+JSON="track_$\{FLIGHT_ID\}.json"\
+CSV="track_$\{FLIGHT_ID\}.csv"\
+\
+curl -sS \\\
+  -H "Authorization: Bearer $FR24_TOKEN" \\\
+  -H "Accept: application/json" \\\
+  -H "Accept-Version: v1" \\\
+  --get \\\
+  --data-urlencode "flight_id=$\{FLIGHT_ID\}" \\\
+  "https://fr24api.flightradar24.com/api/flight-tracks" \\\
+  -o "$JSON"\
+\
+jq -r '\
+  (["ts","lat","lon","alt","track","speed","vspeed","bank","pitch"] | @csv),\
+  (.[0].tracks[] | [\
+    (.timestamp // .ts // .time // ""),\
+    (.lat // .latitude // ""),\
+    (.lon // .longitude // ""),\
+    (.alt // .altitude // ""),\
+    (.track // .heading // ""),\
+    (.speed // .gspeed // .ground_speed // ""),\
+    (.vspeed // .vertical_speed // ""),\
+    (.bank // ""),\
+    (.pitch // "")\
+  ] | @csv)\
+' "$JSON" > "$CSV"\
+\
+echo "CSV written: $CSV"\
+\
+if [[ -n "$START_UTC" && -n "$END_UTC" ]]; then\
+  python3 - "$CSV" "$START_UTC" "$END_UTC" <<'PY'\
+import sys,pandas as pd\
+csv,start,end=sys.argv[1:]\
+df=pd.read_csv(csv)\
+df["ts"]=pd.to_numeric(df["ts"],errors="coerce")\
+df=df.dropna(subset=["ts"])\
+df["utc"]=pd.to_datetime(df["ts"],unit="s",utc=True)\
+seg=df[(df["utc"]>=start)&(df["utc"]<=end)]\
+out=csv.replace(".csv","_window.csv")\
+seg.to_csv(out,index=False)\
+print("Window CSV:",out,"Rows:",len(seg))\
+PY\
+fi\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 Make executable:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+chmod +x fr24_flightid_to_csv.sh\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 Run:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+./fr24_flightid_to_csv.sh 3e115318 2026-01-26T21:28:00Z 2026-01-26T21:41:00Z\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u55358 \u56809 
+\f0\b  Common Errors\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2352\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2305\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth4062\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 Error\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Cause\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Fix\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2352\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2305\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth4062\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\b0 \cf0 Accept-Version required\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Missing header\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Add 
+\f4\fs26 -H "Accept-Version: v1"
+\f2\fs24 \cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2352\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2305\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth4062\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 flight id field required\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Used 
+\f4\fs26 fr24_id
+\f2\fs24  param\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Must be 
+\f4\fs26 flight_id
+\f2\fs24 \cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2352\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2305\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth4062\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 URL does not exist\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Wrong endpoint\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Use 
+\f4\fs26 /api/flight-tracks
+\f2\fs24 \cell \lastrow\row
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f3\fs36 \cf0 \strokec2 \uc0\u55356 \u57263 
+\f0\b  Result\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\b0\fs24 \cf0 You now have:\
+\pard\pardeftab720\partightenfactor0
+
+\f4\fs26 \cf0 \
+track_<flight_id>.csv\
+track_<flight_id>_2128_2141.csv\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f2\fs24 \cf0 These files contain 
+\f0\b playback-quality ADS-B track data
+\f2\b0  ready for:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls2\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 3D simulation\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 CPA analysis\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 ATC sync\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Visualization tools\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 If you'd like, next step is merging this CSV with the ForeFlight export so both aircraft share identical timestamp formats for encounter analysis.\
+}

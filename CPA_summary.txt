@@ -1,0 +1,18 @@
+CPA (Closest Point of Approach) — runway-referenced altitude
+====================================================
+
+Time window (UTC): 2026-01-26T21:28:01+00:00  to  2026-01-26T21:40:58+00:00
+Sample rate: 1 second (both tracks time-interpolated)
+
+CPA time (UTC): 2026-01-26T21:38:48+00:00
+Horizontal separation: 180.3 ft  (0.0297 NM)
+Vertical separation:   172.4 ft
+3D separation:         249.5 ft  (0.0411 NM)
+
+At CPA:
+  RV  lat/lon: 37.694255, -121.844025   alt_rwy: 437.5 ft
+  WD  lat/lon: 37.694211, -121.843403   alt_rwy: 265.1 ft
+
+Notes:
+- Altitudes are runway-referenced per-aircraft (alt_rwy = alt - runway_ref_alt).
+- Horizontal distance uses haversine great-circle distance.
