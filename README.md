@@ -1,6 +1,7 @@
 # CPA-Air
 
-**Repository:** [https://github.com/vlenchik/CPA-Air](https://github.com/vlenchik/CPA-Air)
+**Repository:** [https://github.com/vlenchik/CPA-Air](https://github.com/vlenchik/CPA-Air)  
+**Live Site:** [https://vlenchik.github.io/CPA-Air/](https://vlenchik.github.io/CPA-Air/)
 
 ## Overview
 
@@ -24,9 +25,21 @@ This repository contains analysis of a CPA event between:
 
 ## Quick Start
 
-1. Open `CPA_map_with_audio_embedded.html` in any modern web browser
-2. Press **Play** to start the animation and audio
-3. Use the controls to adjust playback speed or scrub to specific moments
+### Option 1: View Online (Recommended)
+
+Visit the live site at: **[https://vlenchik.github.io/CPA-Air/](https://vlenchik.github.io/CPA-Air/)**
+
+Available pages:
+- [Main Visualization](https://vlenchik.github.io/CPA-Air/CPA_map_with_audio_embedded.html) - Interactive map with embedded audio
+- [Event Analysis](https://vlenchik.github.io/CPA-Air/KLVK%20CPA%20250ft%2020260126.html) - Specific CPA event visualization
+- [Home Page](https://vlenchik.github.io/CPA-Air/) - Project overview and navigation
+
+### Option 2: Run Locally
+
+1. Clone or download the repository
+2. Open `CPA_map_with_audio_embedded.html` in any modern web browser
+3. Press **Play** to start the animation and audio
+4. Use the controls to adjust playback speed or scrub to specific moments
 
 For detailed documentation on how to build and customize the application, see [CPA_Map_App.md](CPA_Map_App.md).
 

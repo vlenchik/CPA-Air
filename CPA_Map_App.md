@@ -1,6 +1,7 @@
 # CPA Animated Map — Application Documentation
 
-**GitHub Repository:** [https://github.com/vlenchik/CPA-Air](https://github.com/vlenchik/CPA-Air)
+**GitHub Repository:** [https://github.com/vlenchik/CPA-Air](https://github.com/vlenchik/CPA-Air)  
+**Live Site:** [https://vlenchik.github.io/CPA-Air/](https://vlenchik.github.io/CPA-Air/)
 
 ## Purpose
 
@@ -98,6 +99,15 @@ python3 embed_audio.py recording.mp3 CPA_map_with_audio.html
 The script reads the audio file, base64-encodes it, and replaces the placeholder in the HTML. It outputs a new file: `CPA_map_with_audio_embedded.html`. It will print the input/output sizes so you can confirm it ran correctly.
 
 ### Step 4 — Open in a Browser
+
+**Option A: View the Live Site**
+
+The application is hosted on GitHub Pages at:  
+**[https://vlenchik.github.io/CPA-Air/CPA_map_with_audio_embedded.html](https://vlenchik.github.io/CPA-Air/CPA_map_with_audio_embedded.html)**
+
+This is the easiest way to view the visualization without downloading anything.
+
+**Option B: Run Locally**
 
 Open `CPA_map_with_audio_embedded.html` in any modern browser (Chrome, Firefox, Safari, Edge). No server is needed — just double-click or drag into the browser.
 
