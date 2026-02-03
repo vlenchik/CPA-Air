@@ -1,5 +1,7 @@
 # CPA Animated Map — Application Documentation
 
+**GitHub Repository:** [https://github.com/vlenchik/CPA-Air](https://github.com/vlenchik/CPA-Air)
+
 ## Purpose
 
 This is a single-file, browser-based playback tool for visualizing a **Closest Point of Approach (CPA)** event between two aircraft. It replays a ±60-second window around the CPA moment, animating both aircraft positions on a map while synchronizing optional ATC audio recorded during the event.
