@@ -1,13 +1,378 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index Page</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLVK CPA ±60s Animated (v1769851488)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+ integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  html, body { height: 100%; margin: 0; }
+  #map { height: 100%; }
+  .panel {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font: 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    z-index: 9999;
+    min-width: 285px;
+  }
+  .row { margin: 4px 0; }
+  .small { opacity: 0.85; font-size: 12px; }
+  .btn {
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.10);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 10px;
+    margin-right: 8px;
+    user-select: none;
+    display: inline-block;
+  }
+  .btn:hover { background: rgba(255,255,255,0.18); }
+  input[type="range"] { width: 265px; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,0.12); }
+
+  .callout {
+    background: rgba(0,0,0,0.78);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 6px 8px;
+    font: 12px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+    white-space: nowrap;
+  }
+</style>
 </head>
 <body>
-    <!-- Content copied from 'KLVK CPA 250ft 20260126.html' -->
-    <h1>Welcome to the Index Page</h1>
-    <p>This is the content copied from the original file.</p>
+<div id="map"></div>
+<audio id="audioPlayer" preload="auto">
+  <source src="https://github.com/vlenchik/CPA-Air/raw/refs/heads/main/KLVK_CPA_Livermore_25Jan2026.m4a" type="audio/mp4">
+  Your browser does not support the audio element.
+</audio>
+
+<script>
+// 1) Create map
+const map = L.map('map', {
+  center: [37.69395, -121.82055],
+  zoom: 14,
+  zoomControl: false,
+  attributionControl: false
+});
+
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'ESRI World Imagery',
+  maxZoom: 19
+}).addTo(map);
+
+// 2) Data
+const RV_DATA = [
+  { ts: "2026-01-25T18:56:19Z", lat: 37.68948, lon: -121.81735, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:56:33Z", lat: 37.68953, lon: -121.81949, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:56:48Z", lat: 37.68958, lon: -121.82166, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:57:03Z", lat: 37.68961, lon: -121.82399, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:57:17Z", lat: 37.68967, lon: -121.82616, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:57:32Z", lat: 37.68972, lon: -121.82826, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:57:48Z", lat: 37.68980, lon: -121.83063, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:58:02Z", lat: 37.68986, lon: -121.83283, alt: 5000, trk: 267 },
+  { ts: "2026-01-25T18:58:17Z", lat: 37.68991, lon: -121.83500, alt: 5000, trk: 267 }
+];
+
+const WD_DATA = [
+  { ts: "2026-01-25T18:56:15Z", lat: 37.70158, lon: -121.81948, alt: 4900, trk: 177 },
+  { ts: "2026-01-25T18:56:29Z", lat: 37.69936, lon: -121.81936, alt: 4900, trk: 175 },
+  { ts: "2026-01-25T18:56:44Z", lat: 37.69681, lon: -121.81925, alt: 4900, trk: 176 },
+  { ts: "2026-01-25T18:56:58Z", lat: 37.69452, lon: -121.81916, alt: 4700, trk: 177 },
+  { ts: "2026-01-25T18:57:13Z", lat: 37.69209, lon: -121.81906, alt: 4800, trk: 177 },
+  { ts: "2026-01-25T18:57:28Z", lat: 37.68961, lon: -121.81895, alt: 4750, trk: 178 },
+  { ts: "2026-01-25T18:57:43Z", lat: 37.68714, lon: -121.81888, alt: 4750, trk: 178 },
+  { ts: "2026-01-25T18:57:58Z", lat: 37.68476, lon: -121.81879, alt: 4750, trk: 178 },
+  { ts: "2026-01-25T18:58:13Z", lat: 37.68241, lon: -121.81872, alt: 4750, trk: 178 }
+];
+
+function parseTime(ts) {
+  return new Date(ts);
+}
+
+const rvParsed = RV_DATA.map(d => ({ ...d, time: parseTime(d.ts) }));
+const wdParsed = WD_DATA.map(d => ({ ...d, time: parseTime(d.ts) }));
+
+const allTimes = [...rvParsed.map(d => d.time), ...wdParsed.map(d => d.time)].sort((a, b) => a - b);
+const minTime = allTimes[0];
+const maxTime = allTimes[allTimes.length - 1];
+const totalSec = (maxTime - minTime) / 1000;
+
+// 3) CPA Time & ±60s window
+const cpaTimeStr = "2026-01-25T18:57:13Z";
+const cpaTime = parseTime(cpaTimeStr);
+
+const cpaDiff = (cpaTime - minTime) / 1000;
+const windowStart = Math.max(0, cpaDiff - 60);
+const windowEnd = Math.min(totalSec, cpaDiff + 60);
+
+// 4) Build icon + marker heading
+function planeIcon(color) {
+  return L.divIcon({
+    className: '',
+    html: `
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <g fill="${color}" stroke="#000" stroke-width="1">
+          <polygon points="16,4 18,14 22,22 18,20 16,28 14,20 10,22 14,14"/>
+        </g>
+      </svg>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+  });
+}
+
+const rvMarker = L.marker([37.69, -121.82], { icon: planeIcon('#FF6B6B') }).addTo(map);
+const wdMarker = L.marker([37.69, -121.82], { icon: planeIcon('#4ECDC4') }).addTo(map);
+
+const rvCallout = L.tooltip({
+  permanent: true,
+  direction: 'top',
+  offset: [0, -20],
+  className: 'callout'
+}).setContent('RV');
+rvMarker.bindTooltip(rvCallout);
+
+const wdCallout = L.tooltip({
+  permanent: true,
+  direction: 'top',
+  offset: [0, -20],
+  className: 'callout'
+}).setContent('WD');
+wdMarker.bindTooltip(wdCallout);
+
+// 5) Build path polylines
+const rvCoords = rvParsed.map(d => [d.lat, d.lon]);
+const wdCoords = wdParsed.map(d => [d.lat, d.lon]);
+
+L.polyline(rvCoords, { color: '#FF6B6B', weight: 2, opacity: 0.5, dashArray: '4,4' }).addTo(map);
+L.polyline(wdCoords, { color: '#4ECDC4', weight: 2, opacity: 0.5, dashArray: '4,4' }).addTo(map);
+
+// Add CPA marker
+{
+  const rvCPA = rvParsed.find(d => d.ts === cpaTimeStr);
+  const wdCPA = wdParsed.find(d => d.ts === cpaTimeStr);
+  const midLat = (rvCPA.lat + wdCPA.lat) / 2;
+  const midLon = (rvCPA.lon + wdCPA.lon) / 2;
+
+  L.circleMarker([midLat, midLon], {
+    color: '#FFD700',
+    fillColor: '#FFFF00',
+    fillOpacity: 0.5,
+    radius: 8
+  })
+    .bindTooltip(`<b>CPA</b><br>${cpaTime}`, {sticky:true})
+    .addTo(map);
+}
+
+function setMarkerHeading(marker, deg) {
+  const el = marker.getElement();
+  if (!el) return;
+
+  const rot = (deg === null || deg === undefined || isNaN(deg)) ? 0 : deg;
+
+  // Rotate inner SVG (or inner wrapper) so Leaflet can keep its translate3d()
+  const svg = el.querySelector('svg');
+  if (!svg) return;
+
+  svg.style.transformOrigin = '50% 50%';
+  svg.style.transform = `rotate(${rot}deg)`;
+}
+
+// Pixel-offset helper (same as before)
+function offsetLatLng(lat, lon, dx, dy) {
+  const lp = map.latLngToLayerPoint([lat, lon]);
+  const lp2 = L.point(lp.x + dx, lp.y + dy);
+  const ll2 = map.layerPointToLatLng(lp2);
+  return [ll2.lat, ll2.lng];
+}
+
+
+// 6) Interpolation helper
+function interpolate(arr, sec) {
+  if (!arr.length) return null;
+  const ms = minTime.getTime() + sec * 1000;
+  if (ms <= arr[0].time.getTime()) return arr[0];
+  if (ms >= arr[arr.length - 1].time.getTime()) return arr[arr.length - 1];
+  for (let i = 0; i < arr.length - 1; i++) {
+    const d1 = arr[i], d2 = arr[i + 1];
+    const t1 = d1.time.getTime(), t2 = d2.time.getTime();
+    if (ms >= t1 && ms <= t2) {
+      const ratio = (ms - t1) / (t2 - t1);
+      return {
+        lat: d1.lat + ratio * (d2.lat - d1.lat),
+        lon: d1.lon + ratio * (d2.lon - d1.lon),
+        alt: d1.alt + ratio * (d2.alt - d1.alt),
+        trk: d1.trk + ratio * (d2.trk - d1.trk),
+        time: new Date(ms)
+      };
+    }
+  }
+  return arr[arr.length - 1];
+}
+
+// 7) Create panel
+const panel = document.createElement('div');
+panel.className = 'panel';
+panel.innerHTML = `
+  <div class="row" style="font-size:14px; font-weight:600; margin-bottom:6px;">
+    CPA — Livermore, CA (25 Jan 2026)
+  </div>
+  <div class="row small">
+    RV: <span class="tag" id="rvInfo">-</span>
+  </div>
+  <div class="row small">
+    WD: <span class="tag" id="wdInfo">-</span>
+  </div>
+  <div class="row small">
+    Sep: <span class="tag" id="sepInfo">-</span>
+  </div>
+  <div class="row small">
+    Time: <span class="tag" id="timeInfo">-</span>
+  </div>
+  <div class="row" style="margin-top:6px;">
+    <input id="slider" type="range" min="${windowStart}" max="${windowEnd}" value="${cpaDiff}" step="0.2"/>
+  </div>
+  <div class="row">
+    <span class="btn" id="btnPlay">▶ Play</span>
+    <span class="btn" id="btnReset">Reset</span>
+  </div>
+`;
+document.body.appendChild(panel);
+
+const slider = document.getElementById('slider');
+const btnPlay = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+
+const rvInfo = document.getElementById('rvInfo');
+const wdInfo = document.getElementById('wdInfo');
+const sepInfo = document.getElementById('sepInfo');
+const timeInfo = document.getElementById('timeInfo');
+
+let isPlaying = false;
+let reqId = null;
+let lastRenderTime = 0;
+
+function formatAlt(a) {
+  return Math.round(a) + ' ft';
+}
+
+function formatCoord(lat, lon) {
+  return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+}
+
+function updateScene() {
+  const sec = parseFloat(slider.value);
+  const rv = interpolate(rvParsed, sec);
+  const wd = interpolate(wdParsed, sec);
+  if (!rv || !wd) return;
+
+  rvMarker.setLatLng([rv.lat, rv.lon]);
+  wdMarker.setLatLng([wd.lat, wd.lon]);
+  setMarkerHeading(rvMarker, rv.trk);
+  setMarkerHeading(wdMarker, wd.trk);
+
+  rvCallout.setContent(`<b>RV</b><br>${formatAlt(rv.alt)}<br>${formatCoord(rv.lat, rv.lon)}`);
+  wdCallout.setContent(`<b>WD</b><br>${formatAlt(wd.alt)}<br>${formatCoord(wd.lat, wd.lon)}`);
+
+  const R = 6371000;
+  const dLat = (wd.lat - rv.lat) * Math.PI / 180;
+  const dLon = (wd.lon - rv.lon) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(rv.lat * Math.PI / 180) *
+    Math.cos(wd.lat * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const horDist = R * c;
+  const altDiff = Math.abs(rv.alt - wd.alt);
+  const sep3D = Math.sqrt(horDist ** 2 + (altDiff * 0.3048) ** 2);
+
+  rvInfo.textContent = `${formatAlt(rv.alt)} @ ${formatCoord(rv.lat, rv.lon)}`;
+  wdInfo.textContent = `${formatAlt(wd.alt)} @ ${formatCoord(wd.lat, wd.lon)}`;
+  sepInfo.textContent = `${Math.round(horDist)} m horiz, ${Math.round(altDiff)} ft vert → ${Math.round(sep3D)} m 3D`;
+
+  const currentTime = new Date(minTime.getTime() + sec * 1000);
+  timeInfo.textContent = currentTime.toISOString().substring(11, 19);
+
+  syncAudioTime(sec);
+}
+
+// 8) Audio sync
+const audioEl = document.getElementById('audioPlayer');
+const audioStart = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--audio-start') || 0);
+
+function syncAudioTime(sec) {
+  if (!audioEl || !audioEl.duration || isNaN(audioEl.duration)) return;
+  const atcTime = audioStart + sec;
+  if (atcTime < 0 || atcTime > audioEl.duration) return;
+  if (Math.abs(audioEl.currentTime - atcTime) > 0.5) {
+    audioEl.currentTime = atcTime;
+  }
+}
+
+function playLoop(t) {
+  if (!isPlaying) return;
+  const now = t || performance.now();
+  const delta = lastRenderTime ? (now - lastRenderTime) / 1000 : 0;
+  lastRenderTime = now;
+
+  let sec = parseFloat(slider.value) + delta;
+  if (sec > parseFloat(slider.max)) {
+    sec = parseFloat(slider.max);
+    stopPlay();
+  }
+  slider.value = sec;
+  updateScene();
+  reqId = requestAnimationFrame(playLoop);
+}
+
+function startPlay() {
+  if (isPlaying) return;
+  isPlaying = true;
+  lastRenderTime = 0;
+  btnPlay.textContent = '⏸ Pause';
+  audioEl.play().catch(() => {});
+  reqId = requestAnimationFrame(playLoop);
+}
+
+function stopPlay() {
+  isPlaying = false;
+  btnPlay.textContent = '▶ Play';
+  audioEl.pause();
+  if (reqId) cancelAnimationFrame(reqId);
+}
+
+btnPlay.addEventListener('click', () => {
+  if (isPlaying) stopPlay();
+  else startPlay();
+});
+
+btnReset.addEventListener('click', () => {
+  stopPlay();
+  slider.value = cpaDiff;
+  updateScene();
+});
+
+slider.addEventListener('input', () => {
+  if (isPlaying) stopPlay();
+  updateScene();
+});
+
+// 9) Initialize
+updateScene();
+
+</script>
 </body>
 </html>

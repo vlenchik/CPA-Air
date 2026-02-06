@@ -179,9 +179,15 @@ if (cpaIdx >= 0) {
 function setMarkerHeading(marker, deg) {
   const el = marker.getElement();
   if (!el) return;
+
   const rot = (deg === null || deg === undefined || isNaN(deg)) ? 0 : deg;
-  el.style.transformOrigin = "center";
-  el.style.transform = `rotate(${rot}deg)`;
+
+  // Rotate inner SVG (or inner wrapper) so Leaflet can keep its translate3d()
+  const svg = el.querySelector('svg');
+  if (!svg) return;
+
+  svg.style.transformOrigin = '50% 50%';
+  svg.style.transform = `rotate(${rot}deg)`;
 }
 
 // Pixel-offset helper (same as before)
